@@ -287,6 +287,7 @@ end
 --AcceptItem XML Builder for Borrowing
 --sometimes Author fields and Title fields are blank
 function buildAcceptItem(currentpiece,totalpieces)
+local bibsuffix = "";
 local tn = "";
 local dr = tostring(GetFieldValue("Transaction", "DueDate"));
 local df = string.match(dr, "%d+\/%d+\/%d+");
@@ -326,7 +327,20 @@ local title = GetFieldValue("Transaction", "LoanTitle");
 	if string.find(title, "&") ~= nil then
 		title = string.gsub(title, "&", "and");
 	end
-	
+
+if (GetFieldValue("Transaction", "LibraryUseOnly") == true) then
+	bibsuffix = ' [Library Use Only] ';
+end
+
+if GetFieldValue("Transaction", "RenewalsAllowed") ~= true) then
+	bibsuffix = bibsuffix .. ' [NO RENEWALS] ';
+end
+
+if (bibsuffix ~= "") then
+	bibsuffix = bibsuffix .. '- due ' .. dr;
+	title = title .. bibsuffix;
+end
+
 local pickup_location_full = GetFieldValue("Transaction", "NVTGC");
 local sublibraries = assert(io.open(AddonInfo.Directory .. "\\sublibraries.txt", "r"));
 local pickup_location = "";
